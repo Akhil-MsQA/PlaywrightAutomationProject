@@ -1,4 +1,18 @@
 import { test, expect } from '../fixtures';
+import { readExcelData } from '../Utilities/utilities';
+
+type ProductData = {
+  TC: string;
+  Productname: string;
+};
+
+const productData = readExcelData<ProductData>('Data.xlsx').find(
+  (row) => row.TC === 'guestUserAddProductToCart_TC.spec',
+);
+
+if (!productData) {
+  throw new Error('Data.xlsx must contain a Productname value for guestUserAddProductToCart_TC.spec');
+}
 
 test('User add Product to cart', async ({ page, homePage: HomePage, productPage: ProductPage, loginPage: LoginPage, productDescriptionPage: ProductDescriptionPage, registerPage: RegisterPage }) => {
 
@@ -32,17 +46,17 @@ test('User add Product to cart', async ({ page, homePage: HomePage, productPage:
 
   await test.step('Add product to cart', async () => {
     await page.reload();
-    await ProductPage.clickAddToCart('iPod Classic');
+    await ProductPage.clickAddToCart(String(productData.Productname));
     await ProductPage.getSucessMsg();
     await expect(ProductPage['successMsg']).toHaveText(
-      'Success: You have added iPod Classic to your shopping cart! ×'
+      'Success: You have added ' + productData.Productname + ' to your shopping cart! ×'
     );
   });
 
   await test.step('Manage wishlist and cart', async () => {
     await ProductPage.clickWishListTab();
     await ProductDescriptionPage.clickCartButton();
-    await ProductDescriptionPage.clickRemoveCart('iPod Classic');
+    await ProductDescriptionPage.clickRemoveCart(String(productData.Productname));
   });
 
   await test.step('Logout and continue', async () => {

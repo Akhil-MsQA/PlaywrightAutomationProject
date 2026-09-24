@@ -1,4 +1,20 @@
 import { test, expect } from '../fixtures';
+import { readExcelData } from '../Utilities/utilities';
+
+type ProductData = {
+  TC: string;
+  Productname: string;
+};
+
+const productData = readExcelData<ProductData>('Data.xlsx').find(
+  (row) => row.TC === 'guestUserAddProductToCart_TC.spec',
+);
+
+if (!productData) {
+  throw new Error('Data.xlsx must contain a Productname value for guestUserAddProductToCart_TC.spec');
+}
+
+const productName = productData.Productname;
 
 test('User add Product to cart', async ({ page, homePage: HomePage, productPage: ProductPage, productDescriptionPage: ProductDescriptionPage }) => {
 
@@ -18,10 +34,11 @@ test('User add Product to cart', async ({ page, homePage: HomePage, productPage:
 
 
   await test.step('Add product to cart', async () => {
-    await ProductPage.clickAddToCart('iPod Classic');
+    console.log(`Adding product to cart: ${productName}`);
+    await ProductPage.clickAddToCart(productName);
     await ProductPage.getSucessMsg();
     await expect(ProductPage['successMsg']).toHaveText(
-      'Success: You have added iPod Classic to your shopping cart! ×'
+      `Success: You have added ${productName} to your shopping cart! ×`
     );
   });
 
