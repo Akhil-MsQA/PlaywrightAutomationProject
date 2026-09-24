@@ -1,4 +1,11 @@
 import { test, expect } from '../fixtures';
+import { readExcelData } from '../Utilities/utilities';
+
+const productData = readExcelData('Data.xlsx').find((row) => row.TC === 'userAddProductDescPage_TC.spec');
+
+if (!productData) {
+  throw new Error('Data.xlsx must contain a row for userAddProductDescPage_TC.spec');
+}
 
 test('User add Product to cart from Desc Page', async ({ page, homePage: HomePage, productPage: ProductPage, productDescriptionPage: ProductDescriptionPage, productCartPage: ProductCartPage, loginPage: LoginPage }) => {
   test.setTimeout(120000);
@@ -23,7 +30,7 @@ test('User add Product to cart from Desc Page', async ({ page, homePage: HomePag
   });
 
   await test.step('Select product Samsung SyncMaster 941BW', async () => {
-    await ProductDescriptionPage.selectProduct('Samsung SyncMaster 941BW');
+    await ProductDescriptionPage.selectProduct(String(productData.Productname));
     const productName = await ProductDescriptionPage.getProductName();
     expect(productName).toBe('Samsung SyncMaster 941BW');
   });
@@ -37,12 +44,11 @@ test('User add Product to cart from Desc Page', async ({ page, homePage: HomePag
     await ProductPage.getSucessMsg();
     await ProductDescriptionPage.getCartCount();
     await ProductPage.clickWishListTab();
-    await ProductPage.clickRemoveWishList();
     });
 
   await test.step('Manage cart', async () => {
     await ProductDescriptionPage.clickCartButton();
-    await ProductDescriptionPage.clickRemoveCart('Samsung SyncMaster 941BW');
+    await ProductDescriptionPage.clickRemoveCart(String(productData.Productname));
   });
 
 });

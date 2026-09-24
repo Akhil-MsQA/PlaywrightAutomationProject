@@ -1,5 +1,23 @@
 import { test, expect } from '../fixtures';
-import { generateRandomEmail } from '../Utilities/utilities';
+import { generateRandomEmail, readExcelData } from '../Utilities/utilities';
+
+type RegistrationData = {
+  TC: string;
+  FirstName: string;
+  Lastname: string;
+  telphone: number;
+  Password: string;
+};
+
+const registrationData = readExcelData<RegistrationData>('Data.xlsx').find(
+  (row) => row.TC === 'guestUserRegister_TC.spec',
+);
+
+if (!registrationData) {
+  throw new Error('Data.xlsx must contain a row for guestUserRegister_TC.spec');
+}
+
+
 
 test('Guest user Register', async ({ page, homePage: HomePage, registerPage: RegisterPage }) => {
   test.setTimeout(60000);
@@ -15,15 +33,15 @@ test('Guest user Register', async ({ page, homePage: HomePage, registerPage: Reg
   });
 
   await test.step('Fill registration form', async () => {
-    await RegisterPage.enterFirstName('Abcd');
-    await RegisterPage.enterLastName('Efgh');
+    await RegisterPage.enterFirstName(registrationData.FirstName);
+    await RegisterPage.enterLastName(registrationData.Lastname);
 
     const randomEmail = generateRandomEmail();
     await RegisterPage.enterEmail(randomEmail);
 
-    await RegisterPage.enterTelephone('1234567890');
-    await RegisterPage.enterPassword('password123');
-    await RegisterPage.enterConfirmPassword('password123');
+    await RegisterPage.enterTelephone(String(registrationData.telphone));
+    await RegisterPage.enterPassword(String(registrationData.Password));
+    await RegisterPage.enterConfirmPassword(String(registrationData.Password));
     await RegisterPage.clickPrivacyPolicyCheckbox();
     await expect(RegisterPage['privacyPolicyCheckbox']).toBeChecked();
   });
